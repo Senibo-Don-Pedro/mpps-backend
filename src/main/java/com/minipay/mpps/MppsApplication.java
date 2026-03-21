@@ -6,7 +6,7 @@ import org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfi
 import org.springframework.data.jpa.repository.config.EnableJpaAuditing;
 
 @SpringBootApplication(exclude = { SecurityAutoConfiguration.class })
-@EnableJpaAuditing
+@EnableJpaAuditing(dateTimeProviderRef = "dateTimeProvider")
 public class MppsApplication {
 
 	public static void main(String[] args) {
