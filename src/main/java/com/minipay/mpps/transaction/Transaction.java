@@ -1,5 +1,6 @@
 package com.minipay.mpps.transaction;
 
+import com.minipay.mpps.common.BaseEntity;
 import com.minipay.mpps.common.enums.TransactionStatus;
 import com.minipay.mpps.common.enums.TransactionType;
 import com.minipay.mpps.wallet.Wallet;
@@ -7,12 +8,8 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.math.BigDecimal;
-import java.time.OffsetDateTime;
 import java.util.Map;
 import java.util.UUID;
 
@@ -23,12 +20,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@EntityListeners(AuditingEntityListener.class)
-public class Transaction {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
-    private UUID id;
+public class Transaction extends BaseEntity {
 
     @ManyToOne()
     @JoinColumn(name = "wallet_id", nullable = false)
@@ -36,11 +28,13 @@ public class Transaction {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private TransactionType type;
 
     @Builder.Default
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @JdbcTypeCode(SqlTypes.NAMED_ENUM)
     private TransactionStatus status = TransactionStatus.PENDING;
 
     @Column(nullable = false, precision = 19, scale = 4)
@@ -55,13 +49,4 @@ public class Transaction {
     @JdbcTypeCode(SqlTypes.JSON)
     @Column(columnDefinition = "jsonb")
     private Map<String, Object> metadata;
-
-    // Auditing
-    @CreatedDate
-    @Column(name = "created_at", nullable = false, updatable = false)
-    private OffsetDateTime createdAt;
-
-    @LastModifiedDate
-    @Column(name = "updated_at", nullable = false)
-    private OffsetDateTime updatedAt;
 }

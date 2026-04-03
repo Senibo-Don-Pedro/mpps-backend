@@ -72,6 +72,15 @@ public class GlobalExceptionHandler {
     }
 
     /**
+     *Handles general bad request exceptions
+     */
+    @ExceptionHandler(BadRequestException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public ApiErrorResponse badRequestException(BadRequestException ex) {
+        return new ApiErrorResponse(false, ex.getMessage(), null);
+    }
+
+    /**
      * Handles 404 Not found exceptions
      */
     @ExceptionHandler(NotFoundException.class)
@@ -95,6 +104,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(AlreadyExistsException.class)
     @ResponseStatus(HttpStatus.CONFLICT)
     public ApiErrorResponse handleAlreadyExistsException(AlreadyExistsException ex) {
+        return new ApiErrorResponse(false, ex.getMessage(), null);
+    }
+
+    /**
+     * Handles 409 General Conflict Exceptions.
+     */
+    @ExceptionHandler(ConflictException.class)
+    @ResponseStatus(HttpStatus.CONFLICT)
+    public ApiErrorResponse conflictException(ConflictException ex) {
         return new ApiErrorResponse(false, ex.getMessage(), null);
     }
 
