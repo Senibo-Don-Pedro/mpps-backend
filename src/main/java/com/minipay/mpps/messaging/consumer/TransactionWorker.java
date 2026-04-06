@@ -2,8 +2,8 @@ package com.minipay.mpps.messaging.consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.minipay.mpps.common.config.RabbitMQConfig;
-import com.minipay.mpps.common.enums.TransactionStatus;
-import com.minipay.mpps.common.enums.TransactionType;
+import com.minipay.mpps.transaction.TransactionStatus;
+import com.minipay.mpps.transaction.TransactionType;
 import com.minipay.mpps.common.exception.BadRequestException;
 import com.minipay.mpps.common.exception.NotFoundException;
 import com.minipay.mpps.idempotency.IdempotencyService;
@@ -14,6 +14,7 @@ import com.minipay.mpps.transaction.dto.TransactionResponse;
 import com.minipay.mpps.transaction.mapper.TransactionMapper;
 import com.minipay.mpps.wallet.Wallet;
 import com.minipay.mpps.wallet.WalletRepository;
+import com.minipay.mpps.webhook.WebhookDispatcherService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.annotation.RabbitListener;
@@ -27,11 +28,11 @@ import java.util.UUID;
 @Slf4j
 public class TransactionWorker {
 
-    // Inject the tools the worker needs to do its job
     private final WalletRepository walletRepository;
     private final TransactionRepository transactionRepository;
     private final ObjectMapper objectMapper;
     private final IdempotencyService idempotencyService;
+    private final WebhookDispatcherService  webhookDispatcherService;
 
     @RabbitListener(queues = RabbitMQConfig.TRANSACTION_QUEUE)
     @Transactional
@@ -98,6 +99,9 @@ public class TransactionWorker {
         //Update the idempotency key
         convertToTransactionString(savedTransaction);
 
+        //Fire Webhook
+        webhookDispatcherService.dispatch(savedTransaction);
+
         log.info("Successfully credited {} to wallet {}", event.amount(), event.toWalletId());
 
     }
@@ -135,6 +139,9 @@ public class TransactionWorker {
 
         //Update the idempotency key
         convertToTransactionString(savedTransaction);
+
+        //Fire Webhook
+        webhookDispatcherService.dispatch(savedTransaction);
 
         log.info("Successfully debited {} from wallet {}", event.amount(), event.fromWalletId());
 
@@ -194,6 +201,9 @@ public class TransactionWorker {
 
         //Update the idempotency key
         convertToTransactionString(savedTransaction);
+
+        //Fire Webhook
+        webhookDispatcherService.dispatch(savedTransaction);
 
 
         log.info("Successfully transferred {} from {} to {}",

@@ -1,8 +1,6 @@
 package com.minipay.mpps.transaction;
 
 import com.minipay.mpps.common.BaseEntity;
-import com.minipay.mpps.common.enums.TransactionStatus;
-import com.minipay.mpps.common.enums.TransactionType;
 import com.minipay.mpps.wallet.Wallet;
 import jakarta.persistence.*;
 import lombok.*;

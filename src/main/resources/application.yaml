@@ -4,6 +4,9 @@ server:
     include-message: never
     include-binding-errors: never
 
+webhook:
+  target-url: https://webhook.site/6af17b7f-ce57-4604-8773-dff6eeba8651
+
 spring:
   application:
     name: mpps
@@ -34,3 +37,11 @@ spring:
     port: 5672
     username: guest
     password: guest
+    listener:
+      simple:
+        retry:
+          enabled: true
+          max-attempts: 5
+          max-interval: 30s
+          multiplier: 2.0
+        default-requeue-rejected: false

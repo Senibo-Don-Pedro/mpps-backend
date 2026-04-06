@@ -1,6 +1,6 @@
 package com.minipay.mpps.idempotency.dto;
 
-import com.minipay.mpps.common.enums.IdempotencyStatus;
+import com.minipay.mpps.idempotency.IdempotencyStatus;
 
 public record IdempotencyResult(
         IdempotencyStatus status,

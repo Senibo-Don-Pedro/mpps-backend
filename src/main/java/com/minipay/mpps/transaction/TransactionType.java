@@ -1,4 +1,4 @@
-package com.minipay.mpps.common.enums;
+package com.minipay.mpps.transaction;
 
 public enum TransactionType {
     CREDIT,

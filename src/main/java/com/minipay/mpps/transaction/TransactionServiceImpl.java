@@ -2,16 +2,13 @@ package com.minipay.mpps.transaction;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.minipay.mpps.common.TransactionReferenceGenerator;
-import com.minipay.mpps.common.enums.IdempotencyStatus;
-import com.minipay.mpps.common.enums.TransactionStatus;
-import com.minipay.mpps.common.enums.TransactionType;
+import com.minipay.mpps.idempotency.IdempotencyStatus;
 import com.minipay.mpps.common.exception.BadRequestException;
 import com.minipay.mpps.common.exception.ConflictException;
 import com.minipay.mpps.common.exception.NotFoundException;
 import com.minipay.mpps.idempotency.IdempotencyService;
 import com.minipay.mpps.idempotency.dto.IdempotencyResult;
 import com.minipay.mpps.messaging.TransactionEvent;
-import com.minipay.mpps.messaging.TransactionEventPublisher;
 import com.minipay.mpps.transaction.dto.CreateTransactionRequest;
 import com.minipay.mpps.transaction.dto.TransactionResponse;
 import com.minipay.mpps.transaction.mapper.TransactionMapper;
@@ -71,6 +68,15 @@ public class TransactionServiceImpl implements TransactionService {
         // Fetch the primary wallet (just to prove it exists before creating the transaction record)
         Wallet primaryWallet = walletRepository.findById(primaryWalletId)
                                                .orElseThrow(() -> new NotFoundException("Wallet not found with id: " + primaryWalletId));
+
+        // Check balance for DEBIT or TRANSFER transactions
+        if (request.transactionType() == TransactionType.DEBIT || request.transactionType() == TransactionType.TRANSFER) {
+            Wallet fromWallet = walletRepository.findById(request.fromWalletId())
+                                                .orElseThrow(() -> new NotFoundException("From wallet not found with id: " + request.fromWalletId()));
+            if (fromWallet.getBalance().compareTo(request.amount()) < 0) {
+                throw new BadRequestException("Insufficient funds");
+            }
+        }
 
         // Create the PENDING transaction (NEW - Consolidated)
         Transaction transaction = Transaction.builder()

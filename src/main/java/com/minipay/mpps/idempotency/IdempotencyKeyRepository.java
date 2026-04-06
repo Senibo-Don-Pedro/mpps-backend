@@ -11,4 +11,6 @@ import java.util.UUID;
 @Repository
 public interface IdempotencyKeyRepository extends JpaRepository<IdempotencyKey, UUID> {
     Optional<IdempotencyKey> findByKey(UUID key);
+
+    void deleteByExpiresAtBefore(OffsetDateTime expiresAt);
 }

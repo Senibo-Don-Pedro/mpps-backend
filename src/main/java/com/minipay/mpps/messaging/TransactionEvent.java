@@ -1,6 +1,6 @@
 package com.minipay.mpps.messaging;
 
-import com.minipay.mpps.common.enums.TransactionType;
+import com.minipay.mpps.transaction.TransactionType;
 
 import java.math.BigDecimal;
 import java.util.UUID;

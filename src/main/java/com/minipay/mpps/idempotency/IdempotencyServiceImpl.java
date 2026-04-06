@@ -1,9 +1,10 @@
 package com.minipay.mpps.idempotency;
 
-import com.minipay.mpps.common.enums.IdempotencyStatus;
 import com.minipay.mpps.common.exception.NotFoundException;
 import com.minipay.mpps.idempotency.dto.IdempotencyResult;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -13,6 +14,7 @@ import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class IdempotencyServiceImpl implements IdempotencyService {
 
     private final IdempotencyKeyRepository idempotencyKeyRepository;
@@ -75,5 +77,21 @@ public class IdempotencyServiceImpl implements IdempotencyService {
         currentKeyEntity.setResponse(response);
 
         idempotencyKeyRepository.save(currentKeyEntity);
+    }
+
+    /**
+     * This method is scheduled to run every day at 2 AM to clean up expired idempotency keys from the database. It deletes all keys where the expiresAt timestamp is before the current time.
+     */
+    @Override
+    @Scheduled(cron = "0 0 2 * * *")
+    @Transactional
+    public void cleanUpExpiredKeys() {
+
+        log.info("Begin cleaning up expired keys");
+
+        idempotencyKeyRepository.deleteByExpiresAtBefore(OffsetDateTime.now());
+
+        log.info("Done cleaning up expired keys");
+
     }
 }

@@ -1,6 +1,6 @@
 package com.minipay.mpps.transaction.dto;
 
-import com.minipay.mpps.common.enums.TransactionType;
+import com.minipay.mpps.transaction.TransactionType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
 

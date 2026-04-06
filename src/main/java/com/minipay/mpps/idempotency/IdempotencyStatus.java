@@ -1,4 +1,4 @@
-package com.minipay.mpps.common.enums;
+package com.minipay.mpps.idempotency;
 
 public enum IdempotencyStatus {
     KEY_NOT_FOUND,

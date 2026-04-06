@@ -11,4 +11,6 @@ public interface IdempotencyService {
     void store(UUID idempotencyKey);
 
     void update(UUID idempotencyKey, String response);
+
+    void cleanUpExpiredKeys();
 }
