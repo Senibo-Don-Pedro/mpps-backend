@@ -2,14 +2,14 @@ package com.minipay.mpps.messaging.consumer;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.minipay.mpps.common.config.RabbitMQConfig;
-import com.minipay.mpps.transaction.TransactionStatus;
-import com.minipay.mpps.transaction.TransactionType;
 import com.minipay.mpps.common.exception.BadRequestException;
 import com.minipay.mpps.common.exception.NotFoundException;
 import com.minipay.mpps.idempotency.IdempotencyService;
 import com.minipay.mpps.messaging.TransactionEvent;
 import com.minipay.mpps.transaction.Transaction;
 import com.minipay.mpps.transaction.TransactionRepository;
+import com.minipay.mpps.transaction.TransactionStatus;
+import com.minipay.mpps.transaction.TransactionType;
 import com.minipay.mpps.transaction.dto.TransactionResponse;
 import com.minipay.mpps.transaction.mapper.TransactionMapper;
 import com.minipay.mpps.wallet.Wallet;
@@ -32,14 +32,14 @@ public class TransactionWorker {
     private final TransactionRepository transactionRepository;
     private final ObjectMapper objectMapper;
     private final IdempotencyService idempotencyService;
-    private final WebhookDispatcherService  webhookDispatcherService;
+    private final WebhookDispatcherService webhookDispatcherService;
 
     @RabbitListener(queues = RabbitMQConfig.TRANSACTION_QUEUE)
     @Transactional
     public void processTransaction(TransactionEvent event) {
         log.info("Worker picked up transaction: {} of type {}",
-                 event.transactionId(),
-                 event.transactionType());
+                event.transactionId(),
+                event.transactionType());
 
         try {
             switch (event.transactionType()) {
@@ -87,10 +87,10 @@ public class TransactionWorker {
 
         // Fetch the original PENDING transaction using event.transactionId().
         Transaction transaction = transactionRepository.findById(event.transactionId())
-                                                       .orElseThrow(
-                                                               () -> new NotFoundException(
-                                                                       "Transaction not found with id: " + event.transactionId())
-                                                       );
+                .orElseThrow(
+                        () -> new NotFoundException(
+                                "Transaction not found with id: " + event.transactionId())
+                );
 
         // Change the transaction status to SUCCESS and save it.
         transaction.setStatus(TransactionStatus.SUCCESS);
@@ -127,10 +127,10 @@ public class TransactionWorker {
 
         // Fetch the original PENDING transaction using event.transactionId().
         Transaction transaction = transactionRepository.findById(event.transactionId())
-                                                       .orElseThrow(
-                                                               () -> new NotFoundException(
-                                                                       "Transaction not found with id: " + event.transactionId())
-                                                       );
+                .orElseThrow(
+                        () -> new NotFoundException(
+                                "Transaction not found with id: " + event.transactionId())
+                );
 
         // Change the transaction status to SUCCESS and save it.
         transaction.setStatus(TransactionStatus.SUCCESS);
@@ -149,8 +149,8 @@ public class TransactionWorker {
 
     protected void handleTransfer(TransactionEvent event) {
         log.info("Executing TRANSFER logic from wallet {} to wallet {}",
-                 event.fromWalletId(),
-                 event.toWalletId());
+                event.fromWalletId(),
+                event.toWalletId());
 
         // Fetch and lock the sender's wallet
         Wallet fromWallet = walletRepository.findByIdForUpdate(event.fromWalletId()).orElseThrow(
@@ -187,14 +187,14 @@ public class TransactionWorker {
 
         // Create a new Credit leg and save it to the database
         Transaction creditTransaction = Transaction.builder()
-                                                   .wallet(toWallet)
-                                                   .type(TransactionType.CREDIT)
-                                                   .status(TransactionStatus.SUCCESS)
-                                                   .amount(event.amount())
-                                                   .reference(transaction.getReference())
-                                                   .idempotencyKey(UUID.randomUUID())
-                                                   .build();
-
+                .wallet(toWallet)
+                .type(TransactionType.CREDIT)
+                .status(TransactionStatus.SUCCESS)
+                .amount(event.amount())
+                .reference(transaction.getReference())
+                .idempotencyKey(UUID.randomUUID())
+                .metadata(transaction.getMetadata())
+                .build();
 
 
         transactionRepository.save(creditTransaction);
@@ -207,9 +207,9 @@ public class TransactionWorker {
 
 
         log.info("Successfully transferred {} from {} to {}",
-                 event.amount(),
-                 event.fromWalletId(),
-                 event.toWalletId());
+                event.amount(),
+                event.fromWalletId(),
+                event.toWalletId());
     }
 
     private void convertToTransactionString(Transaction transaction) {

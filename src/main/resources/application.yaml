@@ -45,3 +45,8 @@ spring:
           max-interval: 30s
           multiplier: 2.0
         default-requeue-rejected: false
+
+
+springdoc:
+  swagger-ui:
+    path: /swagger

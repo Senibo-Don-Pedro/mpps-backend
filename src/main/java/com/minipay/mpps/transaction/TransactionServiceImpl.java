@@ -1,12 +1,13 @@
 package com.minipay.mpps.transaction;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.minipay.mpps.audit.Auditable;
 import com.minipay.mpps.common.TransactionReferenceGenerator;
-import com.minipay.mpps.idempotency.IdempotencyStatus;
 import com.minipay.mpps.common.exception.BadRequestException;
 import com.minipay.mpps.common.exception.ConflictException;
 import com.minipay.mpps.common.exception.NotFoundException;
 import com.minipay.mpps.idempotency.IdempotencyService;
+import com.minipay.mpps.idempotency.IdempotencyStatus;
 import com.minipay.mpps.idempotency.dto.IdempotencyResult;
 import com.minipay.mpps.messaging.TransactionEvent;
 import com.minipay.mpps.transaction.dto.CreateTransactionRequest;
@@ -39,6 +40,7 @@ public class TransactionServiceImpl implements TransactionService {
      */
     @Override
     @Transactional
+    @Auditable(action = "INITIATE_TRANSACTION")
     public TransactionResponse createTransaction(CreateTransactionRequest request) {
         // Check Idempotency
         IdempotencyResult idempotencyResult = idempotencyService.check(request.idempotencyKey());
